@@ -11,7 +11,7 @@ class UnitConverter extends StatelessWidget {
 			title: 'Unit Converter',
 			home: Scaffold(
 				backgroundColor: Colors.green[100],
-				body: CategoryRoute()
+				body: CategoryScreen()
 			),
 		);
 	}
