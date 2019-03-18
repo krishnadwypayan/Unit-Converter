@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:unit_converter_app/category.dart';
 import 'package:unit_converter_app/unit.dart';
+import 'category_tile.dart';
+import 'backdrop.dart';
+import 'converter_route.dart';
 
 
 class CategoryScreen extends StatefulWidget {
@@ -11,7 +14,8 @@ class CategoryScreen extends StatefulWidget {
 }
 
 class _CategoryScreenState extends State<CategoryScreen> {
-	final categories = <Category>[];
+	final _categories = <Category>[];
+	Category _defaultCategory, _currentCategory;
 
 	static const _categoryNames = <String>[
 		'Length',
@@ -24,28 +28,55 @@ class _CategoryScreenState extends State<CategoryScreen> {
 		'Currency',
 	];
 
-	static const _baseColors = <Color>[
-		Colors.teal,
-		Colors.orange,
-		Colors.pinkAccent,
-		Colors.blueAccent,
-		Colors.yellow,
-		Colors.greenAccent,
-		Colors.purpleAccent,
-		Colors.red,
+	
+	static const _baseColors = <ColorSwatch>[
+		ColorSwatch(0xFF6AB7A8, {
+		'highlight': Color(0xFF6AB7A8),
+		'splash': Color(0xFF0ABC9B),
+		}),
+		ColorSwatch(0xFFFFD28E, {
+		'highlight': Color(0xFFFFD28E),
+		'splash': Color(0xFFFFA41C),
+		}),
+		ColorSwatch(0xFFFFB7DE, {
+		'highlight': Color(0xFFFFB7DE),
+		'splash': Color(0xFFF94CBF),
+		}),
+		ColorSwatch(0xFF8899A8, {
+		'highlight': Color(0xFF8899A8),
+		'splash': Color(0xFFA9CAE8),
+		}),
+		ColorSwatch(0xFFEAD37E, {
+		'highlight': Color(0xFFEAD37E),
+		'splash': Color(0xFFFFE070),
+		}),
+		ColorSwatch(0xFF81A56F, {
+		'highlight': Color(0xFF81A56F),
+		'splash': Color(0xFF7CC159),
+		}),
+		ColorSwatch(0xFFD7C0E2, {
+		'highlight': Color(0xFFD7C0E2),
+		'splash': Color(0xFFCA90E5),
+		}),
+		ColorSwatch(0xFFCE9A9A, {
+		'highlight': Color(0xFFCE9A9A),
+		'splash': Color(0xFFF94D56),
+		'error': Color(0xFF912D2D),
+		}),
 	];
 
 	@override
 	void initState() {
 		super.initState();
 		for (var i = 0; i < _categoryNames.length; i++) {
-			categories.add(Category(
+			_categories.add(Category(
 				name: _categoryNames[i],
 				color: _baseColors[i],
 				icon: Icons.cake,
 				units: _retrieveUnitList(_categoryNames[i]),
 			));
 		}
+		_defaultCategory = _categories[0];
 	}
 
 	// Returns a list of mock [Unit]s.
@@ -59,34 +90,45 @@ class _CategoryScreenState extends State<CategoryScreen> {
 		});
 	}
 
-	Widget _buildCategoryWidgets(List<Widget> categories) {
+  	/// Function to call when a [Category] is tapped.
+	_onCategoryTap(Category category) {
+		setState(() {
+			_currentCategory = category;
+		});
+	}
+
+	Widget _buildCategoryWidgets() {
 		return ListView.builder(
-			itemBuilder: (BuildContext context, int index) => categories[index],
-			itemCount: categories.length,
+			itemBuilder: (BuildContext context, int index) {
+				return CategoryTile(
+					category: _categories[index],
+					onTap: _onCategoryTap,
+				);
+			},
+			itemCount: _categories.length,
 		);
   	}
 
 	@override
 	Widget build(BuildContext context) {
-		final listView = Container(
-			color: Colors.green[100],
-			padding: EdgeInsets.symmetric(horizontal: 8.0),
-			child: _buildCategoryWidgets(categories),
-		);
-
-		final appBar = AppBar(
-			elevation: 0.0,
-			backgroundColor: Colors.green[100],
-			centerTitle: true, 
-			title: Text(
-				'Unit Converter',
-				style: TextStyle(fontSize: 30.0, color: Colors.black),
+		final listView = Padding(
+			padding: EdgeInsets.only(
+				left: 8.0,
+				right: 8.0,
+				bottom: 48.0,
 			),
+			child: _buildCategoryWidgets(),
 		);
 
-		return Scaffold(
-			appBar: appBar,
-			body: listView,
+		return Backdrop(
+			currentCategory: 
+				_currentCategory == null ? _defaultCategory : _currentCategory,
+			frontPanel: _currentCategory == null 
+				? UnitConverter(category: _defaultCategory,) 
+				: UnitConverter(category: _currentCategory,),
+			backPanel: listView,
+			frontTitle: Text('Unit Converter'),
+			backTitle: Text('Select a Category'),
 		);
 	}
 }
